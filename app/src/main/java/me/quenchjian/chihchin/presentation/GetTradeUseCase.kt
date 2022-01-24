@@ -14,6 +14,7 @@ class GetTradeUseCase(private val api: Api): CoroutineScope {
   override val coroutineContext: CoroutineContext = Dispatchers.Main
 
   interface Result {
+    fun onLoading(active: Boolean)
     fun onSuccess(trades: List<Trade>)
     fun onFailure(error: Throwable)
   }
@@ -35,14 +36,17 @@ class GetTradeUseCase(private val api: Api): CoroutineScope {
   operator fun invoke(symbol: String = "BTCUSDT") {
     Log.d("GetTradeUseCase", "start")
     launch {
+      listeners.forEach { it.onLoading(true) }
       withContext(Dispatchers.IO) { api.getTrades(symbol) }
         .onSuccess { trade ->
           Log.d("GetTradeUseCase", "success")
           listeners.forEach { it.onSuccess(trade) }
+          listeners.forEach { it.onLoading(false) }
         }
         .onFailure { e ->
           Log.d("GetTradeUseCase", "failure ${e.message}")
           listeners.forEach { it.onFailure(e) }
+          listeners.forEach { it.onLoading(false) }
         }
     }
     Log.d("GetTradeUseCase", "end")

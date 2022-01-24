@@ -37,6 +37,10 @@ class TradeFragment : Fragment(R.layout.view_trade), CoroutineScope by MainScope
   override fun onStart() {
     super.onStart()
     getTrade.register(object : GetTradeUseCase.Result {
+      override fun onLoading(active: Boolean) {
+        tradeView.toggleLoading(active)
+      }
+
       override fun onSuccess(trades: List<Trade>) {
         trade.addAll(trades)
         sortAndShow()
@@ -58,9 +62,7 @@ class TradeFragment : Fragment(R.layout.view_trade), CoroutineScope by MainScope
         sortAndShow()
       }
     }
-    tradeView.toggleLoading(true)
     getTrade()
-    tradeView.toggleLoading(false)
   }
 
   override fun onStop() {
